@@ -150,11 +150,15 @@ class SyncService:
         new_name = data.get("name")
         old_name = pre.get("name", new_name)
 
-        old_fqdn_base = f"{old_name}.{cfg.device_zone}." if old_name else None
+        old_fqdn_base = (
+            f"{old_name.lower()}.{cfg.device_zone.lower()}." if old_name else None
+        )
         if old_fqdn_base and not zones.is_valid_dns_name(old_fqdn_base):
             old_fqdn_base = None
 
-        new_fqdn_base = f"{new_name}.{cfg.device_zone}." if new_name else None
+        new_fqdn_base = (
+            f"{new_name.lower()}.{cfg.device_zone.lower()}." if new_name else None
+        )
         if new_fqdn_base and not zones.is_valid_dns_name(new_fqdn_base):
             logger.warning(
                 "skipping device id=%s name=%r: %r is not a legal DNS hostname",

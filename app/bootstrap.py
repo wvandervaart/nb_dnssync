@@ -152,7 +152,7 @@ def build_desired_state(
     for dev in device_records:
         if not dev.name:
             continue
-        fqdn = f"{dev.name}.{cfg.device_zone}."
+        fqdn = f"{dev.name.lower()}.{cfg.device_zone.lower()}."
         if not zones.is_valid_dns_name(fqdn):
             logger.warning(
                 "skipping device id=%s name=%r: %r is not a legal DNS hostname",
