@@ -1,0 +1,7 @@
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+dnspython>=2.6
+pynetbox>=7.3
+PyYAML>=6.0
+anyio>=4.3

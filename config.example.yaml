@@ -1,0 +1,54 @@
+# nb_dnssync configuration
+#
+# Secrets (NETBOX_TOKEN, NETBOX_WEBHOOK_SECRET, TSIG_SECRET) are NOT set here -
+# they come from environment variables. See .env.example.
+
+netbox:
+  url: "https://netbox.example.com"
+  verify_ssl: true
+
+webhook:
+  path_ipaddress: "/webhook/netbox/ipaddress"
+  path_device: "/webhook/netbox/device"
+
+dns:
+  server: "10.0.0.53"
+  port: 53
+  use_tcp: true
+  timeout: 5
+  ttl: 300
+  tsig:
+    key_name: "nb-dnssync-key"
+    algorithm: "hmac-sha256"
+
+# Forward zones whose apex or subdomains an IP's `dns_name` field may target.
+# Only dns_name values that fall within one of these zones are synced.
+forward_zones:
+  - "example.com"
+  - "corp.example.com"
+
+# Single dedicated zone used for <device-name> A/AAAA records created when an
+# IP is a device's primary IPv4/IPv6 address.
+device_zone: "devices.example.com"
+
+# Explicit CIDR -> reverse zone mapping. Works for classful in-addr.arpa
+# boundaries as well as RFC 2317 classless delegation - the `zone` value is
+# whatever zone BIND is authoritative for; the CIDR just decides which IPs
+# are in scope for that zone.
+reverse_zones:
+  - network: "10.0.0.0/24"
+    zone: "0.0.10.in-addr.arpa"
+  - network: "2001:db8::/64"
+    zone: "0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa"
+
+# When an IP is both a device's primary IP AND has a dns_name that matches a
+# forward zone, which name should own the PTR record?
+#   primary_ip_first -> device name wins (default)
+#   dns_name_first    -> dns_name-derived FQDN wins
+ptr_priority: "primary_ip_first"
+
+state_db_path: "/data/state.sqlite3"
+
+logging:
+  level: "INFO"
+  json: true

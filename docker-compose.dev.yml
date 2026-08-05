@@ -1,0 +1,35 @@
+# Local dev / integration-testing stack: the app plus a throwaway BIND
+# instance and a fake NetBox stand-in, all disposable. NOT for production -
+# see docker-compose.prod.yml for that.
+#
+# Usage: docker compose -f docker-compose.dev.yml up -d --build
+services:
+  bind:
+    image: internetsystemsconsortium/bind9:9.18
+    volumes:
+      - ./docker/bind/named.conf:/etc/bind/named.conf:ro
+      - ./docker/bind/zones:/etc/bind/zones
+    ports:
+      - "5353:53/udp"
+      - "5353:53/tcp"
+
+  netbox-stub:
+    build: ./docker/netbox-stub
+
+  app:
+    build: .
+    depends_on:
+      - bind
+      - netbox-stub
+    environment:
+      NETBOX_TOKEN: dev-token
+      NETBOX_WEBHOOK_SECRET: dev-webhook-secret
+      TSIG_SECRET: "6otESW/n7uVvaHc30Y/8VIp9B3y4Iii33R934Kc94y4="
+    volumes:
+      - ./docker/dev-config.yaml:/app/config.yaml:ro
+      - dnssync-state:/data
+    ports:
+      - "8080:8080"
+
+volumes:
+  dnssync-state:

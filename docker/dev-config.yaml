@@ -1,0 +1,41 @@
+# Config used by docker-compose for local dev / integration testing against
+# the throwaway BIND instance in docker/bind/. Not for production use.
+
+netbox:
+  # Minimal stdlib HTTP stub (docker/netbox-stub/) that always answers with
+  # an empty NetBox-shaped result list - reachable (unlike a real NetBox
+  # instance) so `python -m app.bootstrap --prune` can be exercised in the
+  # integration test, and treats every record already in BIND as an orphan.
+  url: "http://netbox-stub:8080"
+  verify_ssl: false
+
+webhook:
+  path_ipaddress: "/webhook/netbox/ipaddress"
+  path_device: "/webhook/netbox/device"
+
+dns:
+  server: "bind"
+  port: 53
+  use_tcp: true
+  timeout: 5
+  ttl: 300
+  tsig:
+    key_name: "nb-dnssync-key"
+    algorithm: "hmac-sha256"
+
+forward_zones:
+  - "example.com"
+
+device_zone: "devices.example.com"
+
+reverse_zones:
+  - network: "10.0.0.0/24"
+    zone: "0.0.10.in-addr.arpa"
+
+ptr_priority: "primary_ip_first"
+
+state_db_path: "/data/state.sqlite3"
+
+logging:
+  level: "DEBUG"
+  json: false

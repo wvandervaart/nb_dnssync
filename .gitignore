@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+config.yaml
+*.sqlite3
+.idea/
+docker/bind/zones/*.jnl

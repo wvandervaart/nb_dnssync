@@ -1,0 +1,23 @@
+# Production deployment: just the app, talking to your real NetBox and real
+# BIND server. Requires:
+#   - ./config.yaml   (copy config.example.yaml and edit for your environment -
+#                       real forward_zones/device_zone/reverse_zones, dns.server
+#                       pointing at your actual BIND host, etc.)
+#   - ./.env          (copy .env.example and fill in NETBOX_TOKEN,
+#                       NETBOX_WEBHOOK_SECRET, TSIG_SECRET)
+#
+# Usage: docker compose -f docker-compose.prod.yml up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - dnssync-state:/data
+    ports:
+      - "8080:8080"
+
+volumes:
+  dnssync-state:
