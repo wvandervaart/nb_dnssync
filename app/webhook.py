@@ -11,6 +11,7 @@ import json
 import logging
 
 from fastapi import HTTPException, Request
+from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
 from app.models import WebhookEnvelope
@@ -44,7 +45,12 @@ async def handle_webhook_request(request: Request, handler_name: str) -> dict:
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=400, detail="invalid JSON") from exc
 
-    envelope = WebhookEnvelope.model_validate(payload)
+    try:
+        envelope = WebhookEnvelope.model_validate(payload)
+    except ValidationError:
+        logger.exception("invalid webhook payload, raw body: %s", raw_body.decode(errors="replace"))
+        raise HTTPException(status_code=400, detail="invalid webhook payload") from None
+
     sync_service = request.app.state.sync_service
     handler = getattr(sync_service, handler_name)
 
